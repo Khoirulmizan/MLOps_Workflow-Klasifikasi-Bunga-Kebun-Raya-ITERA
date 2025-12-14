@@ -1,0 +1,33 @@
+# File: docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. Layanan API Klasifikasi Bunga
+  flower-api:
+    build: .
+    container_name: flower_api_container
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mounting folder agar data user yang tersimpan di container
+      # juga muncul di folder laptop Anda secara real-time.
+      - ./collected_data:/app/collected_data
+      - ./models:/app/models
+    environment:
+      - ACTIVE_MODEL=blue # Default model
+    restart: unless-stopped
+
+  # 2. Layanan MLflow (Tracking Server)
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow_tracker
+    ports:
+      - "5000:5000"
+    # Perintah untuk menjalankan server MLflow
+    command: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0
+    volumes:
+      - ./mlruns:/mlruns
+      - ./mlflow.db:/mlflow.db
+
+# Cara Jalanin: 
+# docker-compose up --build
