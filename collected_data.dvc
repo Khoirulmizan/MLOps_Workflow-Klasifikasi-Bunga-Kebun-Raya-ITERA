@@ -1,0 +1,6 @@
+outs:
+- md5: 330bda0be6b44712b38c44d642087e62.dir
+  size: 9478997
+  nfiles: 4
+  hash: md5
+  path: collected_data
