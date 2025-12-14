@@ -11,7 +11,7 @@ DEST_ROOT = "Dataset Bunga"
 try:
     with open('class_names.json', 'r') as f:
         VALID_CLASSES = json.load(f)
-except:
+except Exception as e:
     print("Error: class_names.json tidak ditemukan.")
     exit()
 
@@ -40,7 +40,7 @@ def merge_datasets():
         
         # --- LOGIKA BANTUAN ---
         # Karena kita tidak tahu gambar user itu bunga apa (label ground truthnya belum ada),
-        # Script ini akan membuat folder "Unlabeled" di dalam dataset untuk Anda sortiri nanti.
+        # Script ini akan membuat folder "Unlabeled" di dalam dataset untuk sortir manual nanti.
         
         unlabeled_dir = os.path.join(DEST_ROOT, "_UNLABELED_SORT_ME")
         os.makedirs(unlabeled_dir, exist_ok=True)
