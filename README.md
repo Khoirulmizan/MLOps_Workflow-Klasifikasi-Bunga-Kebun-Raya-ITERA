@@ -1,4 +1,4 @@
-**Anggota Kelompok :**
+**Anggota Kelompok : **
 1. Ferdy Kevin Naibaho (122450107)
 2. Ibrahim Al-kahfi (122450100)
 3. Khoirul Mizan Abdullah (122450010)
@@ -153,30 +153,30 @@ source env/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-3. Jalankan Training: Kita akan melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
+3. Jalankan Training : Kita akan melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
 ```python
 python train_with_mlflow.py
 ```
 Tunggu hingga proses training selesai.
 
-4. Cek Hasil: Setelah selesai, periksa folder models/. Harusnya sekarang muncul file baru, misalnya flower_classifier_new.keras (atau nama sesuai script).
+4. Cek Hasil : Setelah selesai, periksa folder models/. Harusnya sekarang muncul file baru, misalnya flower_classifier_new.keras (atau nama sesuai script).
 
 - Ubah nama file tersebut menjadi flower_classifier_model.keras (ini akan jadi model Blue).
 - Copy file tersebut dan beri nama flower_classifier_nano.keras (ini akan jadi dummy model Green).
 - Pastikan file class_names.json juga sudah muncul di root folder.
 
-## Langkah 3: Menjalankan Aplikasi dengan Docker
+## Langkah 3 : Menjalankan Aplikasi dengan Docker
 Sekarang kita akan menyalakan sistem "Mesin Produksi" kita menggunakan Docker Compose.
 
-1. Build & Run: Di terminal, jalankan perintah:
+1. Build & Run : Di terminal, jalankan perintah:
 ```python
 docker-compose up --build
 ```
 Proses ini akan memakan waktu cukup lama di awal karena harus mendownload image Python dan menginstall library.
 
-2. Verifikasi: Jika berhasil, Anda akan melihat log berjalan terus menerus. Jangan tutup terminal ini.
+2. Verifikasi : Jika berhasil, Anda akan melihat log berjalan terus menerus. Jangan tutup terminal ini.
 
-- Buka browser dan akses: http://localhost:8000/docs
+- Buka browser dan akses : http://localhost:8000/docs
 - Jika muncul tampilan Swagger UI (halaman dokumentasi API yang interaktif), berarti server sudah jalan!
 - Buka tab baru: http://localhost:5000
 - Jika muncul dashboard MLflow, berarti server tracking juga jalan.
@@ -189,7 +189,7 @@ Mari kita coba apakah API berfungsi dengan benar.
 3. Klik tombol Try it out (sebelah kanan).
 4. Klik Choose File, pilih sembarang gambar bunga dari komputer Anda.
 5. Klik tombol biru besar Execute.
-6. Lihat Hasil: Scroll ke bawah sedikit. Di bagian "Server response", Anda akan melihat JSON seperti ini:
+6. Lihat Hasil : Scroll ke bawah sedikit. Di bagian "Server response", Anda akan melihat JSON seperti ini:
 ```python
 {
   "model_used": "blue",
@@ -215,7 +215,7 @@ Bayangkan Anda ingin mengganti model tanpa mematikan server.
 ## Langkah 6: Simulasi Retraining (Siklus MLOps)
 Ini adalah langkah terakhir untuk mensimulasikan "pembelajaran berkelanjutan".
 
-1. Validasi Data: Buka terminal baru (terminal Docker biarkan jalan). Jalankan:
+1. Validasi Data: Buka terminal baru (terminal Docker biarkan jalan). Jalankan :
 ```python
 python merge_data.py
 ```
