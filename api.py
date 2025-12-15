@@ -1,138 +1,196 @@
 # File: api.py
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query
-from fastapi.responses import JSONResponse
-import tensorflow as tf
-import numpy as np
-from PIL import Image
-import io
 import os
+import io
 import json
 import shutil
 from datetime import datetime
-from informasi_bunga import DATA_BUNGA
+from typing import Optional
 
-app = FastAPI(title="ITERA Flower Classification API (Blue-Green)")
+# Library FastAPI
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+from fastapi.responses import JSONResponse
 
-# --- Konfigurasi Global ---
-MODELS = {}
-CLASS_NAMES = []
-# Default Active Model
-ACTIVE_MODEL_KEY = "blue" 
-MODEL_PATHS = {
-    "blue": "models/flower_classifier_model.keras",  # Model Lama/Stabil
-    "green": "models/flower_classifier_nano.keras"   # Model Baru/Eksperimental
-}
+# Library Data Science
+import tensorflow as tf
+import numpy as np
+from PIL import Image
+
+# Import Data Bunga
+try:
+    from informasi_bunga import DATA_BUNGA
+except ImportError:
+    DATA_BUNGA = {}
+
+# --- Konfigurasi Awal ---
+app = FastAPI(
+    title="Flower Classification API (Blue-Green)",
+    description="API Klasifikasi Bunga dengan fitur Hot-Swapping Model dan Data Collection.",
+    version="2.0"
+)
+
+# Direktori & Path
+MODELS_DIR = "models"
 COLLECTED_DATA_DIR = "collected_data"
+CLASS_NAMES_PATH = "class_names.json"
 
-# --- Startup Event (Load Models) ---
+# Konfigurasi Model Blue-Green
+# Blue: Model Lama/Stabil
+# Green: Model Baru/Eksperimental (Nano)
+MODEL_PATHS = {
+    "blue": os.path.join(MODELS_DIR, "flower_classifier_model.keras"),
+    "green": os.path.join(MODELS_DIR, "flower_classifier_nano.keras")
+}
+
+# State Global (Menyimpan model di memori RAM)
+LOADED_MODELS = {}
+ACTIVE_MODEL_KEY = "blue"  # Default model yang digunakan
+CLASS_NAMES = []
+
+# --- Event saat Server Menyala (Startup) ---
 @app.on_event("startup")
-async def startup_event():
-    global MODELS, CLASS_NAMES
+async def load_resources():
+    global LOADED_MODELS, CLASS_NAMES
     
-    # Load Class Names
-    try:
-        with open('class_names.json', 'r') as f:
-            CLASS_NAMES = json.load(f)
-    except FileNotFoundError:
-        print("WARNING: class_names.json tidak ditemukan. Jalankan training dulu.")
-        CLASS_NAMES = ["Unknown"] * 22
+    print("--- [SYSTEM] Memulai Server API ---")
 
-    # Load Kedua Model (Blue & Green)
+    # 1. Muat Nama Kelas
+    if os.path.exists(CLASS_NAMES_PATH):
+        with open(CLASS_NAMES_PATH, 'r') as f:
+            CLASS_NAMES = json.load(f)
+        print(f"--- [INFO] {len(CLASS_NAMES)} kelas bunga dimuat.")
+    else:
+        print("--- [WARNING] class_names.json tidak ditemukan! Prediksi akan error.")
+
+    # 2. Muat Kedua Model ke RAM (Pre-loading)
     for color, path in MODEL_PATHS.items():
         if os.path.exists(path):
-            print(f"Loading {color} model from {path}...")
-            MODELS[color] = tf.keras.models.load_model(path)
+            print(f"--- [INFO] Memuat Model {color.upper()} dari {path}...")
+            try:
+                LOADED_MODELS[color] = tf.keras.models.load_model(path)
+                print(f"--- [SUCCESS] Model {color.upper()} siap.")
+            except Exception as e:
+                print(f"--- [ERROR] Gagal memuat {color}: {e}")
+                LOADED_MODELS[color] = None
         else:
-            print(f"WARNING: Model {color} tidak ditemukan di {path}")
-            MODELS[color] = None
+            print(f"--- [WARNING] File model {color} tidak ditemukan di {path}.")
+            LOADED_MODELS[color] = None
 
-# --- Helper Functions ---
+# --- Fungsi Helper (Pembantu) ---
+
+def save_image_for_retraining(image_bytes):
+    """
+    Menyimpan gambar user ke folder terpisah berdasarkan tanggal.
+    Contoh: collected_data/2025-12-15/img_12345.jpg
+    """
+    try:
+        # Buat nama folder tanggal hari ini (YYYY-MM-DD)
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        target_folder = os.path.join(COLLECTED_DATA_DIR, today_date)
+        
+        os.makedirs(target_folder, exist_ok=True)
+        
+        # Buat nama file unik
+        filename = f"user_{datetime.now().strftime('%H%M%S_%f')}.jpg"
+        file_path = os.path.join(target_folder, filename)
+        
+        # Simpan file
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
+            
+        return file_path
+    except Exception as e:
+        print(f"--- [ERROR] Gagal menyimpan data user: {e}")
+        return None
+
 def preprocess_image(image_bytes):
+    """Mengubah bytes gambar menjadi array numpy siap prediksi"""
     img = Image.open(io.BytesIO(image_bytes))
+    
+    # Pastikan RGB
     if img.mode != 'RGB':
         img = img.convert('RGB')
+    
+    # Resize ke 224x224 (Sesuai training)
     img = img.resize((224, 224))
+    
     img_array = np.asarray(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
+    img_array = np.expand_dims(img_array, axis=0) # Tambah dimensi batch
+    img_array = img_array / 255.0  # Normalisasi
     return img_array
 
-def save_user_image(image_bytes):
-    """Menyimpan gambar user ke folder berdasarkan tanggal"""
-    today = datetime.now().strftime("%Y-%m-%d")
-    target_folder = os.path.join(COLLECTED_DATA_DIR, today)
-    
-    # Buat folder jika belum ada (Data Versioning Preparation)
-    os.makedirs(target_folder, exist_ok=True)
-    
-    # Generate nama file unik (timestamp)
-    timestamp = datetime.now().strftime("%H-%M-%S-%f")
-    filename = f"user_upload_{timestamp}.jpg"
-    file_path = os.path.join(target_folder, filename)
-    
-    with open(file_path, "wb") as f:
-        f.write(image_bytes)
-    
-    return file_path
-
-# --- Endpoints ---
+# --- Endpoints API ---
 
 @app.get("/")
-def home():
+def root():
     return {
-        "message": "Flower Classification API Ready",
+        "status": "Online",
         "active_model": ACTIVE_MODEL_KEY,
-        "available_models": list(MODELS.keys())
+        "available_models": {k: "Loaded" if v else "Not Found" for k, v in LOADED_MODELS.items()}
     }
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    """Endpoint utama untuk prediksi bunga"""
+async def predict_flower(file: UploadFile = File(...)):
+    """
+    Endpoint utama: Menerima gambar -> Prediksi dengan Model Aktif
+    """
     global ACTIVE_MODEL_KEY
     
-    if MODELS[ACTIVE_MODEL_KEY] is None:
-        raise HTTPException(status_code=503, detail="Active model is not loaded")
+    # Cek apakah model aktif tersedia
+    model = LOADED_MODELS.get(ACTIVE_MODEL_KEY)
+    if model is None:
+        raise HTTPException(status_code=503, detail=f"Model {ACTIVE_MODEL_KEY} is not available/loaded.")
 
-    # Baca file gambar
+    # 1. Baca File
     image_bytes = await file.read()
     
-    # 1. Simpan Data (Data Collection Pipeline)
-    saved_path = save_user_image(image_bytes)
+    # 2. Simpan Data (Data Versioning Pipeline)
+    saved_path = save_image_for_retraining(image_bytes)
     
-    # 2. Preprocess
-    processed_img = preprocess_image(image_bytes)
-    
-    # 3. Prediksi menggunakan Model Aktif
-    model = MODELS[ACTIVE_MODEL_KEY]
+    # 3. Preprocessing
+    try:
+        processed_img = preprocess_image(image_bytes)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
+
+    # 4. Prediksi
     predictions = model.predict(processed_img)[0]
     
     # Ambil Top 1
-    top_idx = np.argmax(predictions)
-    top_prob = float(predictions[top_idx])
-    predicted_class = CLASS_NAMES[top_idx]
+    top_index = np.argmax(predictions)
+    confidence = float(predictions[top_index])
+    class_name = CLASS_NAMES[top_index] if top_index < len(CLASS_NAMES) else "Unknown"
     
-    # Ambil Info Detail
-    info = DATA_BUNGA.get(predicted_class, {"nama_umum": "Unknown", "deskripsi": "Tidak ada info"})
+    # Ambil Info Detail Bunga
+    info = DATA_BUNGA.get(class_name, {})
     
     return {
         "model_used": ACTIVE_MODEL_KEY,
         "prediction": {
-            "class": predicted_class,
-            "confidence": f"{top_prob*100:.2f}%",
-            "common_name": info['nama_umum'],
-            "description": info['deskripsi'],
-            "latin_name": info.get('nama_latin', '-')
+            "class_name": class_name,
+            "confidence": f"{confidence * 100:.2f}%",
+            "common_name": info.get("nama_umum", "Tidak diketahui"),
+            "latin_name": info.get("nama_latin", "-"),
+            "description": info.get("deskripsi", "Tidak ada deskripsi")
         },
-        "data_collected_at": saved_path
+        "data_storage": {
+            "saved": True if saved_path else False,
+            "path": saved_path
+        }
     }
 
 @app.post("/admin/switch-model")
 def switch_model(color: str = Query(..., regex="^(blue|green)$")):
-    """Endpoint Admin untuk mengubah model aktif (Blue/Green)"""
+    """
+    Fitur Blue-Green Deployment: Mengganti model aktif secara instan.
+    Hanya menerima query parameter 'blue' atau 'green'.
+    """
     global ACTIVE_MODEL_KEY
     
-    if MODELS.get(color) is None:
-        raise HTTPException(status_code=400, detail=f"Model {color} tidak tersedia/gagal dimuat.")
+    if LOADED_MODELS.get(color) is None:
+        raise HTTPException(status_code=400, detail=f"Model {color} belum dimuat atau file tidak ada.")
     
     ACTIVE_MODEL_KEY = color
-    return {"status": "success", "active_model_now": ACTIVE_MODEL_KEY}
+    return {
+        "message": f"Successfully switched to {color.upper()} model",
+        "current_active_model": ACTIVE_MODEL_KEY
+    }
