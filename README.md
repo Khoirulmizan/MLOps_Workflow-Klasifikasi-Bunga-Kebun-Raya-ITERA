@@ -1,4 +1,4 @@
-Anggota Kelompok :
+**Anggota Kelompok :**
 1. Ferdy Kevin Naibaho (122450107)
 2. Ibrahim Al-kahfi (122450100)
 3. Khoirul Mizan Abdullah (122450010)
@@ -20,7 +20,6 @@ Repositori ini merupakan **Tugas Besar Mata Kuliah Machine Learning Operations (
 ##  Struktur Proyek
 
 ```text
-project_root/
 project_root/
 ├── .dvc/                  # Folder konfigurasi DVC (Data Versioning)
 ├── collected_data/        # Folder penampung data dari user
@@ -217,17 +216,17 @@ Bayangkan Anda ingin mengganti model tanpa mematikan server.
 Ini adalah langkah terakhir untuk mensimulasikan "pembelajaran berkelanjutan".
 
 1. Validasi Data: Buka terminal baru (terminal Docker biarkan jalan). Jalankan:
-
+```python
 python merge_data.py
-
+```
 Script ini akan memindahkan gambar dari collected_data ke folder sementara di Dataset Bunga.
 
 2. Sortir Manual: Buka folder Dataset Bunga/_UNLABELED_SORT_ME. Pindahkan gambar-gambar tersebut ke folder bunga yang benar (misal pindahkan foto mawar ke folder dataset/Mawar).
 
 3. Training Ulang: Jalankan lagi training:
-
+```python
 python train_with_mlflow.py
-
+```
 Sekarang model dilatih dengan data yang lebih banyak.
 
 4. Cek MLflow: Buka http://localhost:5000. Klik pada experiment list. Anda akan melihat dua "Run" (satu yang lama, satu yang barusan). Anda bisa klik keduanya dan pilih "Compare" untuk melihat grafik kenaikan akurasinya.
@@ -235,5 +234,6 @@ Sekarang model dilatih dengan data yang lebih banyak.
 
 ## Cara Mematikan Server
 Jika sudah selesai, kembali ke terminal tempat Docker berjalan, lalu tekan: Ctrl + C Atau ketik perintah:
-
+```python
 docker-compose down
+```
