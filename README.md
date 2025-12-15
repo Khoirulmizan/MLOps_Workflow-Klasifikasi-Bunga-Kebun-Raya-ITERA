@@ -1,4 +1,4 @@
-**Anggota Kelompok : **
+**Anggota Kelompok :**
 1. Ferdy Kevin Naibaho (122450107)
 2. Ibrahim Al-kahfi (122450100)
 3. Khoirul Mizan Abdullah (122450010)
@@ -120,7 +120,7 @@ Contoh Render (render.yaml): Repository ini menyertakan render.yaml untuk deploy
 # Langkah - Langkah Menjalankan Kode Proyek Ini
 
 ## Langkah 1: Persiapan Proyek (Setup)
-1. Siapkan Folder Proyek Buat folder baru di komputer, lalu susun file-file yang sudah kita bahas sebelumnya ( api.py, train_with_mlflow.py, docker-compose.yml, dll) sesuai struktur folder ini:
+1. Siapkan Folder Proyek Buat folder baru di komputer, lalu susun file-file yang sudah dibahas sebelumnya ( api.py, train_with_mlflow.py, docker-compose.yml, dll) sesuai struktur folder ini:
 
 ```text
 my_flower_project/
@@ -139,7 +139,7 @@ my_flower_project/
 2. Buka Terminal Buka terminal (Command Prompt/PowerShell/Terminal) di dalam folder my_flower_project.
 
 ## Langkah 2: Pelatihan Model Pertama (Training)
-Sebelum menjalankan API, kita butuh file model (.keras) dan file class_names.json. Kita akan melatihnya di lokal (tanpa Docker dulu agar lebih cepat memanfaatkan resource laptop langsung).
+Sebelum menjalankan API, dibutuhkan file model (.keras) dan file class_names.json. Lalu melatihnya di lokal (tanpa Docker dulu agar lebih cepat memanfaatkan resource laptop langsung).
 1. Buat Virtual Environment (Opsional tapi disarankan):
 
 ```python
@@ -153,7 +153,7 @@ source env/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-3. Jalankan Training : Kita akan melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
+3. Jalankan Training : Melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
 ```python
 python train_with_mlflow.py
 ```
@@ -166,7 +166,7 @@ Tunggu hingga proses training selesai.
 - Pastikan file class_names.json juga sudah muncul di root folder.
 
 ## Langkah 3 : Menjalankan Aplikasi dengan Docker
-Sekarang kita akan menyalakan sistem "Mesin Produksi" kita menggunakan Docker Compose.
+Sekarang nyalakan sistem "Mesin Produksi" yaitu menggunakan Docker Compose.
 
 1. Build & Run : Di terminal, jalankan perintah:
 ```python
@@ -174,7 +174,7 @@ docker-compose up --build
 ```
 Proses ini akan memakan waktu cukup lama di awal karena harus mendownload image Python dan menginstall library.
 
-2. Verifikasi : Jika berhasil, Anda akan melihat log berjalan terus menerus. Jangan tutup terminal ini.
+2. Verifikasi : Jika berhasil, maka akan terlihat log berjalan terus menerus. Jangan tutup terminal ini.
 
 - Buka browser dan akses : http://localhost:8000/docs
 - Jika muncul tampilan Swagger UI (halaman dokumentasi API yang interaktif), berarti server sudah jalan!
@@ -182,14 +182,14 @@ Proses ini akan memakan waktu cukup lama di awal karena harus mendownload image 
 - Jika muncul dashboard MLflow, berarti server tracking juga jalan.
 
 ## Langkah 4: Simulasi Penggunaan (Testing API)
-Mari kita coba apakah API berfungsi dengan benar.
+Mencoba apakah API berfungsi dengan benar.
 
 1. Di halaman http://localhost:8000/docs:
 2. Cari endpoint berwarna hijau bertuliskan POST /predict.
 3. Klik tombol Try it out (sebelah kanan).
 4. Klik Choose File, pilih sembarang gambar bunga dari komputer Anda.
 5. Klik tombol biru besar Execute.
-6. Lihat Hasil : Scroll ke bawah sedikit. Di bagian "Server response", Anda akan melihat JSON seperti ini:
+6. Lihat Hasil : Scroll ke bawah sedikit. Di bagian "Server response", akan terlihat JSON seperti ini:
 ```python
 {
   "model_used": "blue",
@@ -201,10 +201,10 @@ Mari kita coba apakah API berfungsi dengan benar.
   "data_collected_at": "collected_data/2023-12-15/user_upload_..."
 }
 ```
-7. Cek Data Collection: Buka File Explorer di laptop, masuk ke folder collected_data. Kita akan melihat folder tanggal hari ini, dan di dalamnya ada gambar yang barusan Anda upload. Sistem Data Versioning berhasil!
+7. Cek Data Collection: Buka File Explorer di laptop, masuk ke folder collected_data. maka akan terlihat folder tanggal hari ini, dan di dalamnya ada gambar yang barusan di upload. Sistem Data Versioning berhasil!
 
 ## Langkah 5: Simulasi Blue-Green Deployment
-Bayangkan Anda ingin mengganti model tanpa mematikan server.
+Bayangkan jika ingin mengganti model tanpa mematikan server.
 
 1. Buka tab baru di browser atau gunakan fitur "Try it out" di Swagger UI pada endpoint POST /admin/switch-model.
 2. Isi parameter color dengan green.
