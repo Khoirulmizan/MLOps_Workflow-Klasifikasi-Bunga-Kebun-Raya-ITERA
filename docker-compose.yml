@@ -1,0 +1,30 @@
+# File: docker-compose.yml
+version: '3.8'
+
+services:
+  flower-api:
+    build: .
+    container_name: flower_api_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./collected_data:/app/collected_data
+      - ./models:/app/models
+    environment:
+      - ACTIVE_MODEL=blue
+    restart: unless-stopped
+
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow_tracker
+    ports:
+      - "5000:5000"
+    # Menggunakan ////mlflow_store/mlflow.db
+    command: mlflow server --backend-store-uri sqlite:////mlflow_store/mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0
+    volumes:
+      - ./mlruns:/mlruns
+      # Mounting folder, bukan file
+      - ./mlflow_store:/mlflow_store
+
+# Cara Jalanin: 
+# docker-compose up --build

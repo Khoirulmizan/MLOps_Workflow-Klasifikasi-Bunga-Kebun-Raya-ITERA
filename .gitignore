@@ -1,0 +1,25 @@
+# Folder Virtual Environment
+env/
+venv/
+.venv/
+
+# File Sampah Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# File Database Lokal
+*.db
+*.sqlite3
+mlflow.db
+mlflow_store/
+
+# Folder Data (Opsional, jika tidak ingin upload dataset)
+collected_data/
+Dataset Bunga/
+mlruns/
+
+# Konfigurasi Sistem
+.DS_Store
+.vscode/

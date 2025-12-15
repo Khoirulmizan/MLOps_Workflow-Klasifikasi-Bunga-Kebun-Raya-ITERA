@@ -1,0 +1,19 @@
+# File: requirements.txt
+#
+# Daftar pustaka yang dibutuhkan.
+# Instal dengan: pip install -r requirements.txt
+
+tensorflow
+streamlit
+numpy
+Pillow
+opencv-python
+matplotlib
+scipy
+scikit-learn
+fastapi
+uvicorn
+python-multipart
+mlflow
+dvc
+jinja2

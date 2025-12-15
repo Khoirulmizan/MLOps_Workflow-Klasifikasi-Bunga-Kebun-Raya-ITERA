@@ -1,0 +1,15 @@
+# File: render.yaml
+services:
+  # Service untuk API Web
+  - type: web
+    name: flower-classification-api
+    env: docker
+    region: singapore # Pilih region terdekat
+    plan: free # Menggunakan paket gratis
+    branch: main
+    repo: https://github.com/Khoirulmizan/MLOps_Workflow-Klasifikasi-Bunga-Kebun-Raya-ITERA
+    dockerFilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 10000
