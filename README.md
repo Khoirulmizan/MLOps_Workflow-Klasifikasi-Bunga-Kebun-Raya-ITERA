@@ -32,7 +32,7 @@ project_root/
 ├── Dockerfile             # Konfigurasi Image Docker
 ├── docker-compose.yml     # Untuk menjalankan API & MLflow lokal
 └── requirements.txt       # Dependencies
----
+```
 
 ## 1. Dataset Bunga
 
@@ -43,7 +43,7 @@ Beberapa informasi umum yang biasanya ada dalam dataset semacam ini:
 - Label kelas/species bunga sebagai target prediksi.
 - Data bisa berupa CSV atau direktori gambar per kelas.
 
----
+
 
 ##  2. Data Collection & Preprocessing
 
@@ -123,6 +123,7 @@ Contoh Render (render.yaml): Repository ini menyertakan render.yaml untuk deploy
 ## Langkah 1: Persiapan Proyek (Setup)
 1. Siapkan Folder Proyek Buat folder baru di komputer, lalu susun file-file yang sudah kita bahas sebelumnya ( api.py, train_with_mlflow.py, docker-compose.yml, dll) sesuai struktur folder ini:
 
+```text
 my_flower_project/
 ├── dataset/                <-- Isi dengan folder-folder bunga 
 ├── models/                 <-- Buat folder kosong ini dulu
@@ -135,27 +136,28 @@ my_flower_project/
 ├── docker-compose.yml
 ├── requirements.txt
 └── .dockerignore
-
+```
 2. Buka Terminal Buka terminal (Command Prompt/PowerShell/Terminal) di dalam folder my_flower_project.
 
 ## Langkah 2: Pelatihan Model Pertama (Training)
 Sebelum menjalankan API, kita butuh file model (.keras) dan file class_names.json. Kita akan melatihnya di lokal (tanpa Docker dulu agar lebih cepat memanfaatkan resource laptop langsung).
 1. Buat Virtual Environment (Opsional tapi disarankan):
-'''
+
+```python
 python -m venv env
 # Windows:
 .\env\Scripts\activate
 # Mac/Linux:
 source env/bin/activate
-'''
+```
 2. Install Library:
-'''
+```bash
 pip install -r requirements.txt
-'''
-4. Jalankan Training: Kita akan melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
-
+```
+3. Jalankan Training: Kita akan melatih model awal. Pastikan folder Dataset Bunga sudah ada isinya.
+```python
 python train_with_mlflow.py
-
+```
 Tunggu hingga proses training selesai.
 
 4. Cek Hasil: Setelah selesai, periksa folder models/. Harusnya sekarang muncul file baru, misalnya flower_classifier_new.keras (atau nama sesuai script).
@@ -168,9 +170,9 @@ Tunggu hingga proses training selesai.
 Sekarang kita akan menyalakan sistem "Mesin Produksi" kita menggunakan Docker Compose.
 
 1. Build & Run: Di terminal, jalankan perintah:
-
+```python
 docker-compose up --build
-
+```
 Proses ini akan memakan waktu cukup lama di awal karena harus mendownload image Python dan menginstall library.
 
 2. Verifikasi: Jika berhasil, Anda akan melihat log berjalan terus menerus. Jangan tutup terminal ini.
@@ -189,7 +191,7 @@ Mari kita coba apakah API berfungsi dengan benar.
 4. Klik Choose File, pilih sembarang gambar bunga dari komputer Anda.
 5. Klik tombol biru besar Execute.
 6. Lihat Hasil: Scroll ke bawah sedikit. Di bagian "Server response", Anda akan melihat JSON seperti ini:
-
+```python
 {
   "model_used": "blue",
   "prediction": {
@@ -199,7 +201,7 @@ Mari kita coba apakah API berfungsi dengan benar.
   },
   "data_collected_at": "collected_data/2023-12-15/user_upload_..."
 }
-
+```
 7. Cek Data Collection: Buka File Explorer di laptop, masuk ke folder collected_data. Kita akan melihat folder tanggal hari ini, dan di dalamnya ada gambar yang barusan Anda upload. Sistem Data Versioning berhasil!
 
 ## Langkah 5: Simulasi Blue-Green Deployment
