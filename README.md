@@ -229,7 +229,7 @@ python train_with_mlflow.py
 ```
 Sekarang model dilatih dengan data yang lebih banyak.
 
-4. Cek MLflow: Buka http://localhost:5000. Klik pada experiment list. Anda akan melihat dua "Run" (satu yang lama, satu yang barusan). Anda bisa klik keduanya dan pilih "Compare" untuk melihat grafik kenaikan akurasinya.
+4. Cek MLflow: Buka http://localhost:5000. Klik pada experiment list. Kita akan melihat dua "Run" (satu yang lama, satu yang barusan). Lalu bisa klik keduanya dan pilih "Compare" untuk melihat grafik kenaikan akurasinya.
 
 
 ## Cara Mematikan Server
